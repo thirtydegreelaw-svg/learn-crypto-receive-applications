@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoAcademy — Learn Crypto the Right Way</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<header class="nav">
+  <a href="#" class="brand" onclick="showHome();return false;">
+    <span class="brand-mark">₿</span>
+    <span>Crypto<em>Academy</em></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#modules" onclick="showHome()">Modules</a>
+    <a href="#quiz" onclick="showHome()">Quiz</a>
+    <a href="#faq" onclick="showHome()">FAQ</a>
+  </nav>
+  <div class="nav-actions">
+    <span class="pill" id="progressPill">0 / 8 completed</span>
+    <button class="btn btn-ghost btn-sm" id="adminBtn">🔒 Admin Login</button>
+  </div>
+</header>
+
+<!-- ================= HOME VIEW ================= -->
+<main id="homeView">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Free · Beginner friendly · No signup</span>
+        <h1>Learn crypto <span>without the hype.</span></h1>
+        <p class="lead">
+          Eight short, practical modules that take you from "what is a blockchain?"
+          to reading charts and avoiding scams — plus a quiz to test what you learned.
+        </p>
+        <div class="hero-cta">
+          <a href="#modules" class="btn btn-primary">Start learning →</a>
+          <a href="#quiz" class="btn btn-ghost">Take the quiz</a>
+          <a href="webinar.html" class="btn btn-webinar">🎓 Join Live Webinar · ₹299</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong id="statLessons">8</strong><span>Modules</span></div>
+          <div><strong>~45 min</strong><span>Total time</span></div>
+          <div><strong>100%</strong><span>Free</span></div>
+        </div>
+      </div>
+
+      <div class="coin-card">
+        <div class="row">
+          <span class="tag">BTC / USD</span>
+          <span class="live">Live</span>
+        </div>
+        <div class="coin-price" id="demoPrice">$0.00</div>
+        <div class="coin-sub" id="demoChange">+0.00% today</div>
+        <div class="spark" id="spark"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modules">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Curriculum</span>
+        <h2>Learning modules</h2>
+        <p>Work through them in order, or jump to whatever you need. Progress is saved in your browser.</p>
+      </div>
+      <div class="grid" id="lessonGrid"></div>
+    </div>
+  </section>
+
+  <section id="quiz">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Test yourself</span>
+        <h2>Quick knowledge check</h2>
+        <p>Five questions covering the fundamentals. No time limit, no pressure.</p>
+      </div>
+      <div class="quiz-box">
+        <form id="quizForm">
+          <div id="quizQuestions"></div>
+          <button type="submit" class="btn btn-primary">Submit answers</button>
+          <div id="quizResult"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">FAQ</span>
+        <h2>Common questions</h2>
+      </div>
+      <div id="faqList"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap foot-inner">
+      <span>© <span id="year"></span> CryptoAcademy — educational demo project.</span>
+      <span>Nothing here is financial advice. Always do your own research.</span>
+    </div>
+  </footer>
+</main>
+
+<!-- ================= ADMIN VIEW ================= -->
+<main id="adminView" hidden>
+
+  <div id="loginScreen" class="login-wrap">
+    <div class="login-card">
+      <div class="lock">🔐</div>
+      <h2>Admin sign in</h2>
+      <p class="sub">Restricted area — content management only.</p>
+
+      <div class="form-error" id="loginError" hidden></div>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="admin" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+
+      <p class="hint">
+        Demo credentials — user: <code>admin</code> · pass: <code>crypto123</code><br>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showHome()">← Back to site</button>
+      </p>
+    </div>
+  </div>
+
+  <div id="dashboard" class="wrap" hidden style="padding-top:44px;padding-bottom:60px">
+    <div class="dash-head">
+      <div>
+        <span class="eyebrow">Admin dashboard</span>
+        <h2 style="font-size:1.6rem">Content manager</h2>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" type="button" onclick="showApplications()">📥 Receive Applications</button>
+        <button class="btn btn-ghost btn-sm" onclick="showHome()">View site</button>
+        <button class="btn btn-danger btn-sm" onclick="logout()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Total lessons</span><strong id="sLessons">0</strong></div>
+      <div class="stat"><span>Your progress</span><strong id="sProgress">0%</strong></div>
+      <div class="stat"><span>Quiz best score</span><strong id="sQuiz">—</strong></div>
+      <div class="stat"><span>Session</span><strong style="font-size:1.1rem;color:var(--green)">Active</strong></div>
+    </div>
+
+    <div class="panel">
+      <h3 id="formTitle">Add a new lesson</h3>
+      <form id="lessonForm">
+        <input type="hidden" id="editId">
+        <div class="form-grid">
+          <div class="field">
+            <label for="fTitle">Title</label>
+            <input type="text" id="fTitle" placeholder="e.g. Understanding Stablecoins" required>
+          </div>
+          <div class="field">
+            <label for="fIcon">Icon (emoji)</label>
+            <input type="text" id="fIcon" placeholder="🪙" maxlength="4" value="🪙">
+          </div>
+          <div class="field">
+            <label for="fLevel">Level</label>
+            <select id="fLevel">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fDuration">Duration</label>
+            <input type="text" id="fDuration" placeholder="6 min" value="5 min">
+          </div>
+          <div class="field full">
+            <label for="fSummary">Short summary (card text)</label>
+            <input type="text" id="fSummary" placeholder="One sentence describing the lesson" required>
+          </div>
+          <div class="field full">
+            <label for="fContent">Lesson content — separate paragraphs with a blank line</label>
+            <textarea id="fContent" placeholder="First paragraph...&#10;&#10;Second paragraph..." required></textarea>
+          </div>
+          <div class="field full">
+            <label for="fPoints">Key takeaways — one per line</label>
+            <textarea id="fPoints" style="min-height:90px" placeholder="Takeaway one&#10;Takeaway two"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveBtn">Add lesson</button>
+          <button type="button" class="btn btn-ghost" id="cancelEdit" hidden onclick="resetForm()">Cancel</button>
+          <button type="button" class="btn btn-danger" onclick="resetData()" style="margin-left:auto">Reset demo data</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel" id="webinarRegistrationsPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <h3 style="margin-bottom:4px">Webinar Registrations</h3>
+          <p class="muted" style="margin:0">Date-wise list of confirmed registration details (payment may still be pending).</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="exportWebinarRegistrations()">Export CSV</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:16px">
+        <div class="field" style="margin:0;min-width:190px">
+          <label for="webinarDateFilter">Filter by registration date</label>
+          <input type="date" id="webinarDateFilter" onchange="renderWebinarRegistrations()">
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('webinarDateFilter').value='';renderWebinarRegistrations()">Clear filter</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="renderWebinarRegistrations()">Refresh list</button>
+      </div>
+      <div class="stats" style="margin-top:16px">
+        <div class="stat"><span>Total registrations</span><strong id="webinarTotal">0</strong></div>
+        <div class="stat"><span>Payment pending</span><strong id="webinarPending">0</strong></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Registration date & time</th><th>Name</th><th>Mobile</th><th>Email</th><th>Address</th><th>Payment</th></tr></thead>
+          <tbody id="webinarAdminTable"><tr><td colspan="6" class="muted" style="text-align:center;padding:20px">No registrations saved in this browser yet.</td></tr></tbody>
+        </table>
+      </div>
+      <p class="hint">Important: this starter version stores records in this browser's local storage only. To collect registrations from Instagram visitors and see them centrally here, connect a shared database such as Supabase before publishing.</p>
+    </div>
+
+    <div class="panel">
+      <h3>All lessons</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Lesson</th><th>Level</th><th>Duration</th><th style="text-align:right">Actions</th></tr>
+          </thead>
+          <tbody id="adminTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ================= LESSON MODAL ================= -->
+<div class="modal" id="lessonModal" hidden>
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeLesson()" aria-label="Close">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

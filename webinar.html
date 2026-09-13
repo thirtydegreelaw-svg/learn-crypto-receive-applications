@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Register for the Learn Crypto Academy live webinar. Registration fee ₹299.">
+  <title>Live Webinar Registration — CryptoAcademy</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .webinar-wrap{max-width:760px;margin:48px auto 80px;padding:0 22px}
+    .webinar-banner{padding:30px;border:1px solid var(--border);border-radius:22px;background:linear-gradient(135deg,rgba(124,92,255,.22),rgba(34,211,238,.10));margin-bottom:24px}
+    .webinar-banner h1{font-size:clamp(2rem,5vw,3rem);line-height:1.12;margin:8px 0 12px}
+    .webinar-banner p,.form-intro{color:var(--muted)}
+    .fee{font-size:2.2rem;font-weight:900;color:#f6c453;margin-top:12px}
+    .registration-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px}
+    .registration-card h2{margin-bottom:8px}
+    .registration-form{display:grid;gap:16px;margin-top:22px}
+    .registration-form .field label{display:block;margin-bottom:7px;font-weight:650}
+    .registration-form input,.registration-form textarea{width:100%;font:inherit;color:var(--text);background:#0b101b;border:1px solid var(--border);border-radius:10px;padding:13px 14px;outline:none}
+    .registration-form input:focus,.registration-form textarea:focus{border-color:var(--accent2)}
+    .registration-form textarea{min-height:90px;resize:vertical}
+    .payment-box{display:none;margin-top:22px;padding:18px;border:1px solid rgba(246,196,83,.45);border-radius:14px;background:rgba(246,196,83,.07)}
+    .payment-box.show{display:block}
+    .payment-box strong{font-size:1.8rem;color:#f6c453}
+    .notice{font-size:.83rem;color:var(--muted);margin-top:12px}
+    .success-msg{display:none;margin-top:16px;padding:14px;border-radius:12px;background:rgba(34,197,94,.12);color:#86efac}
+    .success-msg.show{display:block}
+    @media(max-width:560px){.registration-card,.webinar-banner{padding:20px}.webinar-wrap{margin-top:26px}}
+  </style>
+</head>
+<body>
+<header class="nav">
+  <a href="index.html" class="brand"><span class="brand-mark">₿</span><span>Crypto<em>Academy</em></span></a>
+  <div class="nav-actions"><a class="btn btn-ghost btn-sm" href="index.html">← Back to Home</a></div>
+</header>
+<main class="webinar-wrap">
+  <section class="webinar-banner">
+    <span class="eyebrow">Special live learning session</span>
+    <h1>Learn Crypto, Blockchain & Web3</h1>
+    <p>Join our live educational webinar and understand cryptocurrency fundamentals, Bitcoin, blockchain, Web3 and DeFi.</p>
+    <div class="fee">₹299 <span style="font-size:.9rem;color:var(--muted);font-weight:500">one-time registration</span></div>
+  </section>
+  <section class="registration-card">
+    <span class="eyebrow">Participant details</span>
+    <h2>Register for the Live Webinar</h2>
+    <p class="form-intro">Fill in your details. After submitting, the payment section will appear.</p>
+    <form class="registration-form" id="webinarForm">
+      <div class="field"><label for="fullName">Full Name *</label><input id="fullName" name="fullName" autocomplete="name" placeholder="Enter your full name" required></div>
+      <div class="field"><label for="mobile">Mobile Number *</label><input id="mobile" name="mobile" type="tel" inputmode="tel" pattern="[0-9+() -]{10,16}" autocomplete="tel" placeholder="Enter mobile number" required></div>
+      <div class="field"><label for="email">Gmail ID *</label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@gmail.com" required></div>
+      <div class="field"><label for="address">Full Address *</label><textarea id="address" name="address" autocomplete="street-address" placeholder="Enter your address" required></textarea></div>
+      <button class="btn btn-primary btn-block" type="submit">Review Details</button>
+    </form>
+
+    <section id="reviewBox" class="payment-box" style="display:none">
+      <div class="eyebrow">Step 2 · Confirm your details</div>
+      <h3>Please check your information</h3>
+      <div id="reviewDetails" style="line-height:1.9;overflow-wrap:anywhere"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+        <button class="btn btn-ghost" type="button" id="editDetails">Edit Details</button>
+        <button class="btn btn-primary" type="button" id="confirmRegistration">Confirm Registration Details</button>
+      </div>
+      <p class="notice">Your details will be saved in this browser and then the payment step will open.</p>
+    </section>
+
+    <div class="payment-box" id="paymentBox">
+      <div class="eyebrow">Step 3 · Registration saved</div>
+      <h3>Complete your payment</h3>
+      <p>Your registration details have been saved. Webinar registration fee:</p>
+      <strong>₹299</strong>
+      <p class="notice">Payment gateway is not connected yet. Connect Razorpay with a secure server and verify payment before confirming a seat.</p>
+      <button class="btn btn-webinar btn-block" type="button" disabled>Payment gateway setup pending</button>
+    </div>
+    <div class="success-msg" id="successMsg" role="status">Your registration details have been saved in this browser. Your seat is not confirmed until payment is verified.</div>
+    <p class="notice">Your information should be sent to a secure backend before going live. Avoid collecting real participant data until storage, privacy notice and payment verification are configured.</p>
+  </section>
+</main>
+<script>
+(function(){
+  const KEY = 'cryptoWebinarRegistrations';
+  const form = document.getElementById('webinarForm');
+  const reviewBox = document.getElementById('reviewBox');
+  const paymentBox = document.getElementById('paymentBox');
+  const reviewDetails = document.getElementById('reviewDetails');
+  let pending = null;
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[ch]));
+  }
+  function getRecords() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch (_) { return []; }
+  }
+  function showReview(data) {
+    reviewDetails.innerHTML =
+      '<p><b>Full Name:</b> ' + escapeHtml(data.fullName) + '</p>' +
+      '<p><b>Mobile:</b> ' + escapeHtml(data.mobile) + '</p>' +
+      '<p><b>Email:</b> ' + escapeHtml(data.email) + '</p>' +
+      '<p><b>Address:</b> ' + escapeHtml(data.address) + '</p>';
+    reviewBox.style.display = 'block';
+    reviewBox.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  form.addEventListener('submit', function(event){
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    const values = new FormData(form);
+    pending = {
+      fullName: values.get('fullName').trim(),
+      mobile: values.get('mobile').trim(),
+      email: values.get('email').trim(),
+      address: values.get('address').trim()
+    };
+    showReview(pending);
+  });
+
+  document.getElementById('editDetails').addEventListener('click', function(){
+    reviewBox.style.display = 'none';
+    form.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+
+  document.getElementById('confirmRegistration').addEventListener('click', function(){
+    if (!pending) return;
+    const records = getRecords();
+    const now = new Date();
+    const record = {
+      id: 'WEB-' + now.getTime(),
+      ...pending,
+      registeredAt: now.toISOString(),
+      registrationDate: now.toLocaleDateString('en-IN'),
+      paymentStatus: 'Pending'
+    };
+    records.push(record);
+    try {
+      localStorage.setItem(KEY, JSON.stringify(records));
+    } catch (error) {
+      alert('Could not save registration in this browser. Please check browser storage settings.');
+      return;
+    }
+    pending = null;
+    form.style.display = 'none';
+    reviewBox.style.display = 'none';
+    paymentBox.classList.add('show');
+    document.getElementById('successMsg').classList.add('show');
+    paymentBox.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+})();
+</script>
+</body>
+</html>
