@@ -213,6 +213,11 @@ function getSafeLink(url) {
 }
 
 
+
+
+let heroPromoTimer = null;
+
+
 async function renderHeroPromo() {
   const container = document.getElementById('heroPromo');
   const heroBtn = document.getElementById('heroWebinarBtn');
@@ -221,6 +226,11 @@ async function renderHeroPromo() {
 
   container.innerHTML = '';
   if (heroBtn) heroBtn.hidden = true;
+
+  if (heroPromoTimer) {
+    clearInterval(heroPromoTimer);
+    heroPromoTimer = null;
+  }
 
   try {
     const supabase = window.supabaseClient;
@@ -235,85 +245,222 @@ async function renderHeroPromo() {
       .maybeSingle();
 
     if (error) throw error;
-
     if (!p) return;
+
+    const images = Array.isArray(p.banner_urls) && p.banner_urls.length
+      ? p.banner_urls
+      : (p.banner_url ? [p.banner_url] : []);
+
+    if (!images.length) return;
 
     const safeLink = url => {
       const u = String(url || '').trim();
-      return /^(https?:\/\/|\/|\.\/|#)/i.test(u)
-        ? u : 'webinar.html';
+      return /^https?:\/\//i.test(u) ? u : 'webinar.html';
     };
 
-    const card = document.createElement('section');
-    card.className = 'promo-banner';
+    if (!document.getElementById('hero-slider-style')) {
+      const style = document.createElement('style');
+      style.id = 'hero-slider-style';
 
-    const content = document.createElement('div');
-    content.className = 'promo-content';
+      style.textContent = `
+        #heroPromo .poster-frame {
+          width: 100%;
+          max-width: 850px;
+          margin: auto;
+          text-align: center;
+          position: relative;
+          box-sizing: border-box;
+        }
 
-    const badge = document.createElement('div');
-    badge.className = 'promo-label';
-    badge.textContent = p.badge || 'SPECIAL WEBINAR';
+        #heroPromo .poster-image {
+          display: block;
+          width: 100%;
+          max-height: 600px;
+          object-fit: contain;
+          border: 2px solid #38bdf8;
+          border-radius: 14px;
+          box-shadow: 0 0 20px rgba(56,189,248,.55);
+          animation: posterSlide 0.7s ease-out both;
+        }
 
-    const title = document.createElement('h2');
-    title.textContent = p.title || '';
+        #heroPromo .poster-arrow {
+          position: absolute;
+          top: 40%;
+          z-index: 2;
+          width: 42px;
+          height: 42px;
+          border: 0;
+          border-radius: 50%;
+          background: rgba(0,0,0,.65);
+          color: white;
+          font-size: 25px;
+          cursor: pointer;
+        }
 
-    const desc = document.createElement('p');
-    desc.textContent = p.description || '';
+        #heroPromo .poster-prev { left: 12px; }
+        #heroPromo .poster-next { right: 12px; }
 
-    const details = document.createElement('div');
-    details.className = 'promo-details';
+        #heroPromo .poster-dots {
+          display: flex;
+          justify-content: center;
+          gap: 9px;
+          margin-top: 13px;
+        }
 
-    if (p.webinar_date) {
-      const s = document.createElement('span');
-      s.textContent = '📅 ' + p.webinar_date;
-      details.append(s);
+        #heroPromo .poster-dot {
+          width: 10px;
+          height: 10px;
+          border: 0;
+          border-radius: 50%;
+          background: #999;
+          cursor: pointer;
+          padding: 0;
+        }
+
+        #heroPromo .poster-dot.active {
+          background: #2563eb;
+          transform: scale(1.35);
+        }
+
+        #heroPromo .poster-register {
+          display: inline-block;
+          margin-top: 16px;
+          padding: 14px 30px;
+          border-radius: 10px;
+          background: #2563eb;
+          color: white;
+          font-weight: 700;
+          text-decoration: none;
+          box-shadow: 0 0 15px rgba(37,99,235,.5);
+        }
+
+        @keyframes posterSlide {
+          from { transform: translateX(-100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+          #heroPromo .poster-image {
+            max-height: 420px;
+            border-radius: 10px;
+          }
+
+          #heroPromo .poster-arrow {
+            width: 34px;
+            height: 34px;
+            font-size: 20px;
+          }
+
+          #heroPromo .poster-register {
+            padding: 12px 24px;
+          }
+        }
+      `;
+
+      document.head.appendChild(style);
     }
 
-    if (p.webinar_time) {
-      const s = document.createElement('span');
-      s.textContent = '🕒 ' + p.webinar_time;
-      details.append(s);
-    }
+    const frame = document.createElement('div');
+    frame.className = 'poster-frame';
 
-    if (p.fee != null) {
-      const s = document.createElement('span');
-      s.textContent = '💰 ₹' + p.fee;
-      details.append(s);
-    }
+    const img = document.createElement('img');
+    img.className = 'poster-image';
+    img.alt = 'Promotional Poster';
+
+    const prev = document.createElement('button');
+    prev.type = 'button';
+    prev.className = 'poster-arrow poster-prev';
+    prev.textContent = '‹';
+    prev.setAttribute('aria-label', 'Previous poster');
+
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'poster-arrow poster-next';
+    next.textContent = '›';
+    next.setAttribute('aria-label', 'Next poster');
+
+    const dots = document.createElement('div');
+    dots.className = 'poster-dots';
 
     const link = document.createElement('a');
-    link.className = 'promo-btn';
-    link.textContent = (p.button_text || 'Register Now') + ' →';
+    link.className = 'poster-register';
+    link.textContent = p.button_text || 'Register Now';
     link.href = safeLink(p.registration_url);
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
 
-    content.append(badge, title);
-    if (p.description) content.append(desc);
-    content.append(details, link);
-    card.append(content);
+    let currentIndex = 0;
 
-    if (p.banner_url) {
-      const img = document.createElement('img');
-      img.src = p.banner_url;
-      img.alt = p.title || 'Webinar Banner';
-      img.loading = 'lazy';
-      card.append(img);
+    function showPoster(index) {
+      currentIndex = (index + images.length) % images.length;
+
+      img.style.animation = 'none';
+      void img.offsetWidth;
+      img.style.animation = 'posterSlide 0.7s ease-out both';
+
+      img.src = images[currentIndex];
+      img.alt = 'Poster ' + (currentIndex + 1);
+
+      dots.querySelectorAll('.poster-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
     }
 
-    container.replaceChildren(card);
+    images.forEach((image, index) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'poster-dot';
+      dot.setAttribute('aria-label', 'Show poster ' + (index + 1));
+      dot.addEventListener('click', () => {
+        showPoster(index);
+        restartTimer();
+      });
+      dots.appendChild(dot);
+    });
 
-    if (heroBtn) {
-      heroBtn.hidden = false;
-      heroBtn.textContent = '🎓 Join Live Webinar' +
-        (p.fee != null ? ' · ₹' + p.fee : '');
-      heroBtn.href = safeLink(p.registration_url);
+    function restartTimer() {
+      if (heroPromoTimer) clearInterval(heroPromoTimer);
+
+      if (images.length > 1) {
+        heroPromoTimer = setInterval(() => {
+          showPoster(currentIndex + 1);
+        }, 7000);
+      }
     }
+
+    prev.addEventListener('click', () => {
+      showPoster(currentIndex - 1);
+      restartTimer();
+    });
+
+    next.addEventListener('click', () => {
+      showPoster(currentIndex + 1);
+      restartTimer();
+    });
+
+    frame.appendChild(img);
+
+    if (images.length > 1) {
+      frame.appendChild(prev);
+      frame.appendChild(next);
+    }
+
+    frame.appendChild(dots);
+    frame.appendChild(link);
+
+    container.appendChild(frame);
+
+    showPoster(0);
+    restartTimer();
 
   } catch (error) {
     console.error('Homepage Banner Error:', error);
     container.innerHTML = '';
-    if (heroBtn) heroBtn.hidden = true;
   }
 }
+
+
+
 
 
 /* ---------- INIT ---------- */
