@@ -516,3 +516,46 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:40px}
     0 0 25px rgba(0, 140, 255, 0.35);
   box-sizing: border-box;
 }
+
+@media (max-width: 650px) {
+  .nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    height: auto;
+  }
+
+  .brand {
+    order: 0;
+    font-size: 14px;
+  }
+
+  .nav-actions {
+    order: 1;
+    display: flex;
+    margin-left: auto;
+  }
+
+  #progressPill {
+    display: none;
+  }
+
+  .nav-links {
+    order: 2;
+    display: flex !important;
+    justify-content: center;
+    width: 100%;
+    gap: 22px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+}
