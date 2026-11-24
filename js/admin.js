@@ -12,6 +12,7 @@ import { supabase } from './supabase.js';
   let lessons       = [];
   let editingId     = null;
   let applications  = [];
+  let promoBannerUrls = [];
 
   /* ---------------- toast + notes ---------------- */
   let toastTimer;
@@ -430,11 +431,16 @@ async function deleteApplication(id) {
   $('prFee').value = p?.fee ?? '';
   $('prButton').value = p?.button_text || '';
   $('prUrl').value = p?.registration_url || '';
-  $('prBannerUrl').value = p?.banner_url || '';
+  promoBannerUrls = Array.isArray(p?.banner_urls)
+  ? [...p.banner_urls]
+  : (p?.banner_url ? [p.banner_url] : []);
+
+$('prBannerUrl').value = promoBannerUrls[0] || '';
   $('prActive').checked = p?.is_active ?? false;
 
   renderPromoPreview();
 }
+
 async function loadCurrentBannerList() {
   const list = $('currentBannerList');
 
@@ -442,8 +448,8 @@ async function loadCurrentBannerList() {
     .from('webinar_promotions')
     .select('*')
     .order('updated_at', { ascending: false })
-.limit(1)
-.maybeSingle();
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
     list.textContent = 'Banner loading failed: ' + error.message;
@@ -455,64 +461,148 @@ async function loadCurrentBannerList() {
     return;
   }
 
-  list.innerHTML = `
-    <div style="padding:12px;border:1px solid var(--border);border-radius:10px">
-      <strong>${esc(banner.title || 'Untitled Banner')}</strong>
-      <p>${esc(banner.description || '')}</p>
-      <p>Status: ${banner.is_active ? 'Active' : 'Hidden'}</p>
-      <button type="button" class="btn btn-danger btn-sm" id="deleteCurrentBanner">
-        Delete Banner
+  promoBannerUrls = Array.isArray(banner.banner_urls)
+    ? [...banner.banner_urls]
+    : (banner.banner_url ? [banner.banner_url] : []);
+
+  if (promoBannerUrls.length === 0) {
+    list.innerHTML = '<p class="muted">No posters uploaded yet.</p>';
+    return;
+  }
+
+  list.innerHTML = promoBannerUrls.map((url, index) => `
+    <div style="padding:12px;margin-bottom:12px;border:1px solid var(--border);border-radius:10px">
+      <strong>Poster ${index + 1}</strong>
+      <img src="${esc(url)}" alt="Poster ${index + 1}"
+        style="display:block;width:100%;max-width:300px;margin:10px 0;border-radius:8px;object-fit:contain">
+
+      <button type="button" class="btn btn-sm"
+        data-poster-up="${index}" ${index === 0 ? 'disabled' : ''}>
+        ↑ ऊपर
+      </button>
+
+      <button type="button" class="btn btn-sm"
+        data-poster-down="${index}" ${index === promoBannerUrls.length - 1 ? 'disabled' : ''}>
+        ↓ नीचे
+      </button>
+
+      <button type="button" class="btn btn-danger btn-sm"
+        data-poster-delete="${index}">
+        Delete
       </button>
     </div>
-  `;
+  `).join('');
 
-  $('deleteCurrentBanner').addEventListener('click', async () => {
-    if (!confirm('Are you sure you want to delete this banner?')) return;
-
-    const { error: deleteError } = await supabase
+  async function savePosterChanges() {
+    const { error: saveError } = await supabase
       .from('webinar_promotions')
-      .delete()
+      .update({
+        banner_urls: promoBannerUrls,
+        banner_url: promoBannerUrls[0] || '',
+        updated_at: new Date().toISOString()
+      })
       .eq('id', banner.id);
 
-    if (deleteError) {
-      toast('Delete failed: ' + deleteError.message);
-      return;
+    if (saveError) {
+      toast('Update failed: ' + saveError.message);
+      return false;
     }
 
-    toast('Banner deleted');
+    $('prBannerUrl').value = promoBannerUrls[0] || '';
     await loadCurrentBannerList();
-    await loadPromoForm();
+    renderPromoPreview();
+    toast('Poster list updated');
+    return true;
+  }
+
+  list.querySelectorAll('[data-poster-up]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const index = Number(button.dataset.posterUp);
+      [promoBannerUrls[index - 1], promoBannerUrls[index]] =
+        [promoBannerUrls[index], promoBannerUrls[index - 1]];
+      await savePosterChanges();
+    });
+  });
+
+  list.querySelectorAll('[data-poster-down]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const index = Number(button.dataset.posterDown);
+      [promoBannerUrls[index + 1], promoBannerUrls[index]] =
+        [promoBannerUrls[index], promoBannerUrls[index + 1]];
+      await savePosterChanges();
+    });
+  });
+
+  list.querySelectorAll('[data-poster-delete]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const index = Number(button.dataset.posterDelete);
+
+      if (!confirm('क्या आप यह पोस्टर हटाना चाहते हैं?')) return;
+
+      promoBannerUrls.splice(index, 1);
+      await savePosterChanges();
+    });
   });
 }
+
   function renderPromoPreview() {
-    const el = $('promoPreview');
-    if (!$('prActive').checked) {
-      el.innerHTML = '<p class="muted">Banner is hidden on the website.</p>';
-      return;
-    }
-    const banner = $('prBannerUrl').value.trim();
-    const img = banner
-      ? `<div style="margin-top:14px"><img src="${esc(banner)}" alt="Banner"
-           style="max-width:100%;border-radius:10px;max-height:180px;object-fit:cover"></div>`
-      : '';
-    el.innerHTML = `
-      <span class="preview-badge">${esc($('prBadge').value || 'SPECIAL WEBINAR')}</span>
-      <div class="preview-title">${esc($('prTitle').value || 'Untitled promo')}</div>
-      <div class="preview-sub">${esc($('prDescription').value || 'No description.')}</div>
-      <div class="promo-details" style="margin-bottom:16px">
-        ${$('prDate').value ? `<span>📅 ${esc($('prDate').value)}</span>` : ''}
-        ${$('prTime').value ? `<span>🕒 ${esc($('prTime').value)}</span>` : ''}
-        ${$('prFee').value ? `<span>💰 ₹${esc($('prFee').value)}</span>` : ''}
-      </div>
-      <span class="btn btn-primary btn-sm">${esc($('prButton').value || 'Register Now')}</span>
-      ${img}`;
+  const el = $('promoPreview');
+
+  if (!$('prActive').checked) {
+    el.innerHTML = '<p class="muted">Banner is hidden on the website.</p>';
+    return;
   }
-    
+
+  const images = promoBannerUrls.length
+    ? promoBannerUrls
+    : ($('prBannerUrl').value.trim()
+        ? [$('prBannerUrl').value.trim()]
+        : []);
+
+  if (!images.length) {
+    el.innerHTML = '<p class="muted">अभी कोई पोस्टर अपलोड नहीं हुआ है।</p>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="max-width:500px;margin:auto;text-align:center">
+      <img
+        src="${esc(images[0])}"
+        alt="Poster Preview"
+        style="
+          display:block;
+          width:100%;
+          max-height:500px;
+          object-fit:contain;
+          border:2px solid #38bdf8;
+          border-radius:14px;
+          box-shadow:0 0 18px rgba(56,189,248,.55);
+        "
+      >
+
+      <a
+        href="${esc($('prUrl').value.trim() || '#')}"
+        target="_blank"
+        rel="noopener"
+        class="btn btn-primary"
+        style="display:inline-block;margin-top:14px;text-decoration:none"
+      >
+        ${esc($('prButton').value || 'Register Now')}
+      </a>
+
+      <p class="muted" style="margin-top:8px">
+        ${images.length} Poster(s) uploaded
+      </p>
+    </div>
+  `;
+}  
+
 async function submitPromo(e) {
   e.preventDefault();
 
-  const file = document.getElementById('bannerFile')?.files?.[0];
-  let bannerUrl = $('prBannerUrl').value.trim();
+  const files = Array.from(
+    document.getElementById('bannerFile')?.files || []
+  );
 
   const btn = e.target.querySelector('button[type="submit"]');
   const originalText = btn.textContent;
@@ -520,21 +610,41 @@ async function submitPromo(e) {
   btn.disabled = true;
 
   try {
-    // 1. Upload image
-    if (file) {
+    btn.textContent = 'Checking existing posters...';
+
+    const { data: existing, error: findError } = await supabase
+      .from('webinar_promotions')
+      .select('id, banner_urls, banner_url')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (findError) throw findError;
+
+    let bannerUrls = Array.isArray(existing?.banner_urls)
+      ? [...existing.banner_urls]
+      : [];
+
+    // पुराने पोस्टर को सुरक्षित रखें
+    if (bannerUrls.length === 0 && existing?.banner_url) {
+      bannerUrls.push(existing.banner_url);
+    }
+
+    // सभी चुने हुए पोस्टर अपलोड करें
+    for (const file of files) {
       if (!file.type.startsWith('image/')) {
-        throw new Error('Please select an image file');
+        throw new Error('Only image files are allowed');
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Image must be smaller than 5 MB');
+        throw new Error(file.name + ' is larger than 5 MB');
       }
 
-      btn.textContent = 'Uploading image...';
+      btn.textContent = 'Uploading ' + file.name + '...';
 
       const extension = file.name.split('.').pop().toLowerCase();
       const filePath =
-        `banners/${Date.now()}-${Math.floor(Math.random() * 1000)}.${extension}`;
+        `banners/${Date.now()}-${Math.floor(Math.random() * 100000)}.${extension}`;
 
       const { error: uploadError } = await supabase.storage
         .from('webinar-banners')
@@ -546,11 +656,9 @@ async function submitPromo(e) {
         .from('webinar-banners')
         .getPublicUrl(filePath);
 
-      bannerUrl = data.publicUrl;
-      $('prBannerUrl').value = bannerUrl;
+      bannerUrls.push(data.publicUrl);
     }
 
-    // 2. Prepare database data
     const payload = {
       is_active: $('prActive').checked,
       badge: $('prBadge').value.trim(),
@@ -558,28 +666,16 @@ async function submitPromo(e) {
       description: $('prDescription').value.trim(),
       webinar_date: $('prDate').value || null,
       webinar_time: $('prTime').value.trim(),
-      fee: $('prFee').value === ''
-        ? null
-        : Number($('prFee').value),
+      fee: $('prFee').value === '' ? null : Number($('prFee').value),
       button_text: $('prButton').value.trim(),
       registration_url: $('prUrl').value.trim(),
-      banner_url: bannerUrl,
+      banner_urls: bannerUrls,
+      banner_url: bannerUrls[0] || '',
       updated_at: new Date().toISOString()
     };
 
-    btn.textContent = 'Saving...';
+    btn.textContent = 'Saving posters...';
 
-    // 3. Find existing banner
-    const { data: existing, error: findError } = await supabase
-      .from('webinar_promotions')
-      .select('id')
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (findError) throw findError;
-
-    // 4. Update existing banner or insert new banner
     let saveResult;
 
     if (existing) {
@@ -595,28 +691,26 @@ async function submitPromo(e) {
 
     if (saveResult.error) throw saveResult.error;
 
-    // 5. Refresh admin panel
-    document.getElementById('bannerFile').value = '';
+    $('bannerFile').value = '';
 
     await loadPromoForm();
     await loadCurrentBannerList();
-
     renderPromoPreview();
 
-    note('promoMsg', 'Banner saved successfully!', 'ok');
-    toast('Banner saved successfully');
+    note('promoMsg', 'All posters saved successfully!', 'ok');
+    toast('Posters saved successfully');
 
   } catch (error) {
     console.error('Banner Save Error:', error);
-
     note('promoMsg', 'Save failed: ' + error.message, 'err');
-    toast('Database error: ' + error.message);
+    toast('Upload error: ' + error.message);
 
   } finally {
     btn.textContent = originalText;
     btn.disabled = false;
   }
 }
+
 
 
   /* =========================================================

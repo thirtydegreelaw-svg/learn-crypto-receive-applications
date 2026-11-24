@@ -360,9 +360,16 @@
 
         <!-- ONLY ONE FILE INPUT -->
         <div class="field full">
-          <label for="bannerFile">Upload Banner Image (max 5MB)</label>
-          <input type="file" id="bannerFile" accept="image/*" style="padding: 9px;">
-        </div>
+  <label for="bannerFile">Upload Multiple Poster Images (each max 5MB)</label>
+  <input
+    type="file"
+    id="bannerFile"
+    accept="image/*"
+    multiple
+    style="padding: 9px;"
+  >
+  <small class="muted">एक साथ कई पोस्टर चुन सकते हैं।</small>
+</div>
 
         <label style="display:flex;align-items:center;gap:10px;margin:16px 0;font-size:.9rem;color:var(--muted)">
           <input type="checkbox" id="prActive" style="width:16px;height:16px;accent-color:var(--accent)" checked>
