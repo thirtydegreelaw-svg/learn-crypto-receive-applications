@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase Connection Test</title>
+</head>
+<body>
+    <h2>Supabase Connection Test</h2>
+    <button id="test">Test Connection</button>
+    <pre id="result">Waiting...</pre>
+
+    <script type="module">
+    import { supabase } from './js/supabase.js';
+
+    document.getElementById('test').onclick = async () => {
+        const output = document.getElementById('result');
+        output.textContent = 'Connecting...';
+
+        try {
+            const { data, error } = await supabase
+                .from('webinar_registrations')
+                .select('*')
+                .limit(1);
+
+            if (error) throw error;
+
+            output.textContent =
+                'SUCCESS! Supabase Connected.\n' +
+                JSON.stringify(data, null, 2);
+
+        } catch (error) {
+            output.textContent =
+                'ERROR:\n' + error.message;
+
+            console.error(error);
+        }
+    };
+    </script>
+</body>
+</html>

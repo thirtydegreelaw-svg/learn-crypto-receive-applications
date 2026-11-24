@@ -277,3 +277,183 @@ footer{border-top:1px solid var(--border);padding:34px 0;margin-top:40px}
 .btn-webinar{background:linear-gradient(135deg,#f6c453,#f08b35);color:#17120a;border-color:transparent;font-weight:800}
 .btn-webinar:hover{transform:translateY(-2px);box-shadow:0 10px 26px -10px #f6c453}
 .nav-webinar{color:#f6c453!important;font-weight:800}
+
+
+/* ---------- HERO PROMO BANNER ---------- */
+.promotion-area {
+  width: 100%;
+  padding: 10px 0 30px;
+}
+
+.promo-banner {
+  display: grid;
+  /* If there is no image, it will auto-adjust to fill the space perfectly */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  align-items: center;
+  padding: 30px;
+  border: 1px solid #344b65;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #142e3b, #19294a);
+  color: #ffffff;
+  box-shadow: 0 15px 40px rgba(0,0,0,.2);
+}
+
+.promo-label {
+  color: #4de1d2;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.promo-banner h2 {
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.2;
+  margin: 0 0 10px 0;
+  color: #ffffff;
+}
+
+.promo-banner p {
+  color: #bac7d9;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.promo-details {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 15px 0 20px 0;
+  color: #e5edf8;
+  font-size: 13px;
+}
+
+.promo-btn {
+  display: inline-block;
+  background: linear-gradient(110deg, #4de1d2, #7ba1ff);
+  color: #07131c !important;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 800;
+  text-decoration: none !important;
+  transition: .2s;
+}
+
+.promo-btn:hover {
+  transform: translateY(-2px);
+  opacity: .9;
+}
+
+.promo-image-wrap img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+@media(max-width: 700px) {
+  .promo-banner {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+  .promo-image-wrap {
+    order: -1;
+  }
+}
+
+/* =========================================================
+   FOOTER SECTION
+   ========================================================= */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 50px 0 30px 0;
+  margin-top: 40px;
+  background: var(--bg);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-links a {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.footer-links a:hover {
+  color: var(--accent2);
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ----- Footer Social Icons ----- */
+.footer-socials {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-socials .social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.footer-socials .social-icon:hover {
+  color: #fff;
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 5px 15px rgba(124,92,255,0.2);
+}
+
+.footer-socials .social-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* ----- Footer Responsive ----- */
+@media (max-width: 768px) {
+  .footer-grid { 
+    grid-template-columns: 1fr; 
+    gap: 30px; 
+  }
+}

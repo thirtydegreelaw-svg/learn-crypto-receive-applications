@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Live Webinar Registration - Crypto Academy</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.webinar-wrap {
+    max-width:760px;
+    margin:48px auto;
+    padding:0 22px;
+}
+
+.webinar-banner {
+    padding:30px;
+    border:1px solid var(--border);
+    border-radius:22px;
+    background:linear-gradient(135deg,rgba(124,92,255,.22),rgba(34,211,238,.10));
+    margin-bottom:24px;
+}
+
+.webinar-banner h1 {
+    font-size:clamp(2rem,5vw,3rem);
+    line-height:1.12;
+    margin:12px 0;
+}
+
+.fee {
+    font-size:2.2rem;
+    font-weight:900;
+    color:#f6c453;
+    margin-top:12px;
+}
+
+.registration-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:28px;
+}
+
+.registration-form {
+    display:grid;
+    gap:18px;
+    margin-top:22px;
+}
+
+.registration-form label {
+    display:block;
+    margin-bottom:7px;
+    font-weight:650;
+}
+
+.registration-form input,
+.registration-form textarea {
+    width:100%;
+    font:inherit;
+    color:var(--text);
+    background:#0b101b;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+    outline:none;
+}
+
+.registration-form input:focus,
+.registration-form textarea:focus {
+    border-color:var(--accent2);
+}
+
+.registration-form textarea {
+    min-height:90px;
+    resize:vertical;
+}
+
+.payment-box {
+    display:none;
+    margin-top:22px;
+    padding:20px;
+    border:1px solid rgba(246,196,83,.45);
+    border-radius:14px;
+    background:rgba(246,196,83,.07);
+}
+
+.payment-box.show {
+    display:block;
+}
+
+.payment-box strong {
+    font-size:2rem;
+    color:#f6c453;
+}
+
+.success-msg {
+    display:none;
+    margin-top:16px;
+    padding:14px;
+    border-radius:12px;
+    background:rgba(34,197,94,.12);
+    color:#86efac;
+}
+
+.success-msg.show {
+    display:block;
+}
+
+.notice {
+    font-size:.85rem;
+    color:var(--muted);
+    margin-top:12px;
+}
+
+#reviewDetails {
+    white-space:pre-line;
+    line-height:1.9;
+    overflow-wrap:anywhere;
+}
+
+@media(max-width:560px) {
+    .registration-card,
+    .webinar-banner {
+        padding:20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="nav">
+    <a href="index.html" class="brand">
+        <span class="brand-mark">₿</span>
+        <span>Crypto<em>Academy</em></span>
+    </a>
+
+    <div class="nav-actions">
+        <a class="btn btn-ghost btn-sm" href="index.html">
+            Back to Home
+        </a>
+    </div>
+</header>
+
+<main class="webinar-wrap">
+
+    <section class="webinar-banner">
+        <span class="eyebrow">Special Live Learning Session</span>
+
+        <h1>Learn Crypto, Blockchain & Web3</h1>
+
+        <p>
+            Join our live educational webinar and understand
+            Cryptocurrency, Bitcoin, Blockchain, Web3 and DeFi.
+        </p>
+
+        <div class="fee">
+            ₹299
+            <span style="font-size:14px;color:var(--muted)">
+                One-time registration
+            </span>
+        </div>
+    </section>
+
+    <section class="registration-card">
+
+        <span class="eyebrow">Participant Details</span>
+
+        <h2>Register for the Live Webinar</h2>
+
+        <p>
+            Fill in your details and review them before confirmation.
+        </p>
+
+        <!-- Registration Form -->
+
+        <form class="registration-form" id="webinarForm">
+
+            <div class="field">
+                <label for="fullName">Full Name *</label>
+                <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    autocomplete="name"
+                    placeholder="Enter your full name"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="mobile">Mobile Number *</label>
+                <input
+                    id="mobile"
+                    name="mobile"
+                    type="tel"
+                    inputmode="tel"
+                    autocomplete="tel"
+                    placeholder="Enter mobile number"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="email">Gmail ID *</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="you@gmail.com"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="address">Full Address *</label>
+                <textarea
+                    id="address"
+                    name="address"
+                    autocomplete="street-address"
+                    placeholder="Enter your full address"
+                    required
+                ></textarea>
+            </div>
+
+            <button
+                class="btn btn-primary btn-block"
+                type="submit"
+            >
+                Review Details
+            </button>
+
+        </form>
+
+        <!-- Confirmation Section -->
+
+        <section
+            id="reviewBox"
+            class="payment-box"
+        >
+
+            <span class="eyebrow">Step 2 - Confirm Details</span>
+
+            <h3>Please Check Your Information</h3>
+
+            <div id="reviewDetails"></div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+
+                <button
+                    class="btn btn-ghost"
+                    type="button"
+                    id="editDetails"
+                >
+                    Edit Details
+                </button>
+
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                    id="confirmRegistration"
+                >
+                    Confirm Registration
+                </button>
+
+            </div>
+
+            <p class="notice">
+                Please verify your information before confirming.
+            </p>
+
+        </section>
+
+        <!-- Payment Section -->
+
+        <section
+            class="payment-box"
+            id="paymentBox"
+        >
+
+            <span class="eyebrow">Step 3 - Payment</span>
+
+            <h3>Complete Your Payment</h3>
+
+            <p>Your registration details have been saved.</p>
+
+            <strong>₹299</strong>
+
+            <p class="notice">
+                Razorpay payment gateway is not connected yet.
+                Your seat will be confirmed only after verified payment.
+            </p>
+
+            <button
+    id="payNowBtn"
+    class="btn btn-webinar btn-block"
+    type="button"
+    style="background:#3395ff;color:white;"
+>
+    Pay ₹299 Securely
+</button>
+
+        </section>
+
+        <div
+            class="success-msg"
+            id="successMsg"
+            role="status"
+        >
+            Registration successfully saved!
+        </div>
+
+        <p class="notice">
+            Your information is submitted to our registration database.
+        </p>
+
+    </section>
+
+</main>
+
+<!-- Supabase Connection -->
+
+<script type="module">
+
+import { supabase } from './js/supabase.js';
+
+const form = document.getElementById('webinarForm');
+
+const reviewBox = document.getElementById('reviewBox');
+
+const paymentBox = document.getElementById('paymentBox');
+
+const reviewDetails = document.getElementById('reviewDetails');
+
+const confirmButton = document.getElementById('confirmRegistration');
+
+let pending = null;
+
+
+// STEP 1: Review Form
+
+form.addEventListener('submit', function(e) {
+
+    e.preventDefault();
+
+    if (!form.reportValidity()) return;
+
+    const values = new FormData(form);
+
+    pending = {
+        fullName: values.get('fullName').trim(),
+        mobile: values.get('mobile').trim(),
+        email: values.get('email').trim(),
+        address: values.get('address').trim()
+    };
+
+    reviewDetails.textContent =
+        'Name: ' + pending.fullName + '\n' +
+        'Mobile: ' + pending.mobile + '\n' +
+        'Email: ' + pending.email + '\n' +
+        'Address: ' + pending.address;
+
+    reviewBox.style.display = 'block';
+
+    reviewBox.scrollIntoView({
+        behavior:'smooth',
+        block:'center'
+    });
+
+});
+
+
+// STEP 2: Edit Details
+
+document.getElementById('editDetails')
+.addEventListener('click', function() {
+
+    reviewBox.style.display = 'none';
+
+    form.scrollIntoView({
+        behavior:'smooth',
+        block:'center'
+    });
+
+});
+
+
+// STEP 3: Save Registration in Supabase
+
+confirmButton.addEventListener('click', async function() {
+
+    if (!pending) return;
+
+    confirmButton.disabled = true;
+
+    confirmButton.textContent = 'Saving Registration...';
+
+    try {
+
+        const { error } = await supabase
+            .from('webinar_registrations')
+            .insert([{
+                full_name: pending.fullName,
+                mobile: pending.mobile,
+                email: pending.email,
+                address: pending.address
+            }]);
+
+        if (error) {
+            throw error;
+        }
+
+        // Registration Saved Successfully
+
+        form.style.display = 'none';
+
+        reviewBox.style.display = 'none';
+
+        paymentBox.classList.add('show');
+
+        const successMsg = document.getElementById('successMsg');
+
+        successMsg.textContent =
+            'Your registration has been successfully saved in our database.';
+
+        successMsg.classList.add('show');
+
+        pending = null;
+
+        paymentBox.scrollIntoView({
+            behavior:'smooth',
+            block:'center'
+        });
+
+    } catch (error) {
+
+        console.error('Supabase Error:', error);
+
+        alert(
+            'Registration Save Failed: ' + error.message
+        );
+
+        confirmButton.disabled = false;
+
+        confirmButton.textContent = 'Confirm Registration';
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

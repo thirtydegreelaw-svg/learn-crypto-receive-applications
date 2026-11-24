@@ -1,12 +1,15 @@
 /* =========================================================
    CryptoAcademy — Data layer
-   Edit this file to change lessons, quiz, FAQ, or credentials.
    ========================================================= */
 
 const LS = {
   lessons:   'ca_lessons_v1',
   completed: 'ca_completed_v1',
-  quiz:      'ca_quizbest_v1'
+  quiz:      'ca_quizbest_v1',
+  quizData:  'ca_quiz_v1',
+  faqs:      'ca_faqs_v1',
+  promo:     'ca_promo_v1',
+  registrations: 'ca_registrations_v1'
 };
 
 const ADMIN_USER = 'admin';
@@ -155,38 +158,73 @@ const DEFAULT_LESSONS = [
   }
 ];
 
-const QUIZ = [
-  {
-    q: 'What does a blockchain primarily provide?',
-    options: ['A way to make free money', 'A distributed, tamper-resistant ledger', 'A private database owned by a bank', 'A faster version of PayPal'],
-    answer: 1
-  },
-  {
-    q: 'Which of these should you NEVER share with anyone?',
-    options: ['Your public wallet address', 'Your seed phrase / private key', 'A transaction ID', 'Your favourite coin'],
-    answer: 1
-  },
-  {
-    q: 'What is a seed phrase?',
-    options: ['A password for your email', '12–24 words that can restore your wallet', 'A type of mining reward', 'The name of a trading strategy'],
-    answer: 1
-  },
-  {
-    q: 'What is a "gas fee"?',
-    options: ['A fee paid to process a transaction on a network', 'A tax charged by the government', 'The cost of a hardware wallet', 'A fee paid to your bank'],
-    answer: 0
-  },
-  {
-    q: '"Not your keys, not your crypto" means…',
-    options: ['You should never own keys', 'If a third party holds your keys, you do not truly control the assets', 'Only Bitcoin has keys', 'Keys are unnecessary with exchanges'],
-    answer: 1
-  }
+const DEFAULT_QUIZ = [
+  { q: 'What does a blockchain primarily provide?', options: ['A way to make free money', 'A distributed, tamper-resistant ledger', 'A private database owned by a bank', 'A faster version of PayPal'], answer: 1 },
+  { q: 'Which of these should you NEVER share with anyone?', options: ['Your public wallet address', 'Your seed phrase / private key', 'A transaction ID', 'Your favourite coin'], answer: 1 },
+  { q: 'What is a seed phrase?', options: ['A password for your email', '12–24 words that can restore your wallet', 'A type of mining reward', 'The name of a trading strategy'], answer: 1 },
+  { q: 'What is a "gas fee"?', options: ['A fee paid to process a transaction on a network', 'A tax charged by the government', 'The cost of a hardware wallet', 'A fee paid to your bank'], answer: 0 },
+  { q: '"Not your keys, not your crypto" means…', options: ['You should never own keys', 'If a third party holds your keys, you do not truly control the assets', 'Only Bitcoin has keys', 'Keys are unnecessary with exchanges'], answer: 1 }
 ];
 
-const FAQS = [
+const DEFAULT_FAQS = [
   { q: 'Do I need to buy crypto to use this site?', a: 'No. Every module is free and none of them require you to own anything. Think of it as a textbook, not a trading app.' },
   { q: 'Is this financial advice?', a: 'Absolutely not. This is an educational demo covering how the technology works. Do your own research before making any financial decision.' },
   { q: 'How is my progress stored?', a: 'Progress and quiz scores are saved in your browser\'s localStorage. Nothing is sent to a server — clear your browser data and it resets.' },
   { q: 'Can I add my own lessons?', a: 'Yes — sign in with the admin credentials, then use the content manager to create, edit or delete lessons. Changes persist in your browser.' },
   { q: 'Where can I learn more?', a: 'Read the original Bitcoin whitepaper, follow protocol documentation for whichever chain interests you, and treat every influencer recommendation with suspicion.' }
 ];
+
+const DEFAULT_PROMO = {
+  active: true,
+  badge: '🚀 SPECIAL WEBINAR',
+  title: 'Crypto Fundamentals Bootcamp',
+  description: 'A 90-minute live session on wallets, security and your first purchase.',
+  webinarDate: '',
+  webinarTime: '8:00 PM IST',
+  fee: 299,
+  buttonText: 'Register Now',
+  registrationUrl: 'webinar.html',
+  bannerUrl: '',
+  updatedAt: new Date().toISOString()
+};
+
+const DEFAULT_REGISTRATIONS = [
+  { id:'r1', name:'Priya Sharma',  mobile:'9876543210', email:'priya@example.com', address:'Mumbai, MH', registeredAt:'2026-11-10T10:30:00Z', payment:'Pending' },
+  { id:'r2', name:'Rahul Verma',   mobile:'9823456789', email:'rahul@example.com', address:'Delhi, DL',  registeredAt:'2026-11-12T14:15:00Z', payment:'Paid' },
+  { id:'r3', name:'Ananya Iyer',   mobile:'9988776655', email:'ananya@example.com', address:'Bengaluru, KA', registeredAt:'2026-11-14T09:00:00Z', payment:'Paid' }
+];
+
+/* =========================================================
+   Shared read/write helpers (Bulletproof)
+   ========================================================= */
+function readJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return structuredClone(fallback);
+    
+    const parsed = JSON.parse(raw);
+    
+    // If the stored data is an empty array, force it to return the default fallback
+    if (Array.isArray(parsed) && parsed.length === 0) {
+      return structuredClone(fallback);
+    }
+    return parsed;
+  } catch (e) {
+    return structuredClone(fallback);
+  }
+}
+
+function writeJSON(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+const getLessons = () => readJSON(LS.lessons, DEFAULT_LESSONS);
+const getQuiz    = () => readJSON(LS.quizData, DEFAULT_QUIZ);
+const getFaqs    = () => readJSON(LS.faqs,     DEFAULT_FAQS);
+const getPromo   = () => readJSON(LS.promo,    DEFAULT_PROMO);
+const getRegistrations = () => readJSON(LS.registrations, DEFAULT_REGISTRATIONS);
+const saveRegistrations = (list) => writeJSON(LS.registrations, list);
+
+/* Compatibility for older scripts */
+var QUIZ = getQuiz();
+var FAQS = getFaqs();
